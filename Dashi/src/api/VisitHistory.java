@@ -10,12 +10,14 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import db.DBConnection;
+import db.MongoDBConnection;
 import db.MySQLDBConnection;
 
 /**
@@ -41,6 +43,7 @@ public class VisitHistory extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 			DBConnection connection = new MySQLDBConnection();
+			// DBConnection connection = new MongoDBConnection();
 			JSONObject input = RpcParser.parseInput(request);
 			if (input.has("user_id") && input.has("visited")) {
 				String userId = (String) input.get("user_id");
@@ -94,6 +97,12 @@ public class VisitHistory extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		// allow access only if session exists
+		HttpSession session = request.getSession();
+		if (session.getAttribute("user") == null) {
+			response.setStatus(403);
+			return;
+		}
 		try {
 			DBConnection connection = new MySQLDBConnection();
 			JSONArray array = null;

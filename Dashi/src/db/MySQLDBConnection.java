@@ -2,6 +2,7 @@ package db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -178,20 +179,20 @@ public class MySQLDBConnection implements DBConnection {
 		try {
 			// step 1
 			Set<String> visitedRestaurants = getVisitedRestaurants(userId);
-			
+
 			// step 2
 			Set<String> allCategories = new HashSet<>();// why hashSet?
 			for (String restaurant : visitedRestaurants) {
 				allCategories.addAll(getCategories(restaurant));
 			}
-			
+
 			// step 3
 			Set<String> allRestaurants = new HashSet<>();
 			for (String category : allCategories) {
 				Set<String> set = getBusinessId(category);
 				allRestaurants.addAll(set);
 			}
-			
+
 			// step 4
 			Set<JSONObject> diff = new HashSet<>();
 			int count = 0;
@@ -205,7 +206,7 @@ public class MySQLDBConnection implements DBConnection {
 					}
 				}
 			}
-			
+
 			// step 5: order by distance
 			return new JSONArray(diff);
 		} catch (Exception e) {
@@ -258,8 +259,17 @@ public class MySQLDBConnection implements DBConnection {
 			if (conn == null) {
 				return false;
 			}
-			String sql = "SELECT user_id from users WHERE user_id='" + userId + "' and password='" + password + "'";
-			ResultSet rs = executeFetchStatement(sql);
+			
+			// String sql = "SELECT user_id from users WHERE user_id='" + userId
+			// + "' and password='" + password + "'";
+			// ResultSet rs = executeFetchStatement(sql);
+			
+			String sql = "SELECT user_id from users WHERE user_id=? and password=?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, userId);
+			pstmt.setString(2, password);
+			ResultSet rs = pstmt.executeQuery();
+			
 			if (rs.next()) {
 				return true;
 			}

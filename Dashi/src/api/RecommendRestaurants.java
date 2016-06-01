@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 
 import db.DBConnection;
+import db.MongoDBConnection;
 import db.MySQLDBConnection;
 
 @WebServlet("/recommendation")
@@ -20,6 +21,7 @@ public class RecommendRestaurants extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		DBConnection connection = new MySQLDBConnection();
+//		DBConnection connection = new MongoDBConnection();
 		JSONArray array = new JSONArray();
 		if (request.getParameterMap().containsKey("user_id")) {
 			String userId = request.getParameter("user_id");
@@ -27,5 +29,6 @@ public class RecommendRestaurants extends HttpServlet {
 
 		}
 		RpcParser.writeOutput(response, array);
+		connection.close();
 	}
 }
